@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.usermetadata.DTO.ApiResponse;
+import com.example.usermetadata.DTO.LoginRequest;
+import com.example.usermetadata.DTO.RegisterRequest;
 import com.example.usermetadata.DTO.ServiceResponse;
 import com.example.usermetadata.Entity.UserMetaData;
 import com.example.usermetadata.Repository.UserRepo;
@@ -17,35 +19,37 @@ public class UserService {
 	@Autowired
 	UserRepo userRepo;
 	
-	public ServiceResponse register(UserMetaData registerData) {
+	public ServiceResponse register(RegisterRequest registerRequest) {
 		
-		if (registerData.getUsername() == null || registerData.getEmail() == null || registerData.getPassword() == null) {
-            return new ServiceResponse(new ApiResponse("Please fill required details!", false), 400);
-        }
-
-        if (userRepo.findByEmail(registerData.getEmail()).isPresent()) {
+        if (userRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
             return new ServiceResponse(new ApiResponse("User already present, try different email!", false), 409);
         }
+        if (userRepo.findByUsername(registerRequest.getUsername()).isPresent()) {
+            return new ServiceResponse(new ApiResponse("Username is already taken!", false), 409);
+        }
 
-        userRepo.save(registerData);
+        
+        UserMetaData newUser = new UserMetaData();
+        newUser.setUsername(registerRequest.getUsername());
+        newUser.setEmail(registerRequest.getEmail());
+        newUser.setPassword(registerRequest.getPassword());
+
+        userRepo.save(newUser);
+        
 		return new ServiceResponse(new ApiResponse("Account created successfully", true), 200);
 		
 	}
 	
-	public ServiceResponse login(UserMetaData loginData) {
+	public ServiceResponse login(LoginRequest loginRequest) {
 		
-		if (loginData.getEmail() == null || loginData.getPassword() == null) {
-            return new ServiceResponse(new ApiResponse("Please fill required details!", false), 400);
-        }
-		
-		Optional<UserMetaData> userOptional = userRepo.findByEmail(loginData.getEmail());
+		Optional<UserMetaData> userOptional = userRepo.findByEmail(loginRequest.getEmail());
         if (userOptional.isEmpty()) {
             return new ServiceResponse(new ApiResponse("User not found!", false), 400);
         }
         
         
         UserMetaData user = userOptional.get();
-        if (!user.getPassword().equals(loginData.getPassword())) {
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
             return new ServiceResponse(new ApiResponse("Invalid credentials!", false), 401);
         }
         

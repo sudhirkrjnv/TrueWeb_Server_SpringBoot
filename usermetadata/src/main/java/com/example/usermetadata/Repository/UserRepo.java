@@ -8,4 +8,5 @@ import com.example.usermetadata.Entity.UserMetaData;
 
 public interface UserRepo extends JpaRepository<UserMetaData, Long> {
 	Optional<UserMetaData> findByEmail(String email);
+	Optional<UserMetaData> findByUsername(String username);
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.usermetadata.DTO.ApiResponse;
@@ -19,7 +20,13 @@ public class UserService {
 	@Autowired
 	UserRepo userRepo;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	//private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
 	public ServiceResponse register(RegisterRequest registerRequest) {
+		
 		
         if (userRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
             return new ServiceResponse(new ApiResponse("User already present, try different email!", false), 409);
@@ -32,8 +39,13 @@ public class UserService {
         UserMetaData newUser = new UserMetaData();
         newUser.setUsername(registerRequest.getUsername());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setPassword(registerRequest.getPassword());
-
+        //newUser.setPassword(registerRequest.getPassword());
+        
+        //newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        
+        String hashedPassword = passwordEncoder.encode(registerRequest.getPassword());
+        newUser.setPassword(hashedPassword);
+        
         userRepo.save(newUser);
         
 		return new ServiceResponse(new ApiResponse("Account created successfully", true), 200);
@@ -49,7 +61,12 @@ public class UserService {
         
         
         UserMetaData user = userOptional.get();
-        if (!user.getPassword().equals(loginRequest.getPassword())) {
+        
+//        if (!user.getPassword().equals(loginRequest.getPassword())) {
+//            return new ServiceResponse(new ApiResponse("Invalid credentials!", false), 401);
+//        }
+        
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return new ServiceResponse(new ApiResponse("Invalid credentials!", false), 401);
         }
         

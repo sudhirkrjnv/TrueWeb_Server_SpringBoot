@@ -17,7 +17,7 @@ import com.example.usermetadata.Services.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/connected/v1/user")
 public class UserController {
 	@Autowired
 	UserService userService;

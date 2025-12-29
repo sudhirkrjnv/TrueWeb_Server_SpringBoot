@@ -3,16 +3,13 @@ package com.example.usermetadata.Services;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.usermetadata.DTO.ApiResponse;
-import com.example.usermetadata.DTO.LoginRequest;
 import com.example.usermetadata.DTO.MessageResponse;
 import com.example.usermetadata.DTO.RegisterRequest;
-import com.example.usermetadata.DTO.ServiceResponse;
 import com.example.usermetadata.DTO.UserApiResponse;
 import com.example.usermetadata.DTO.UserResponse;
 import com.example.usermetadata.Entity.UserMetaData;
@@ -27,16 +24,12 @@ public class UserService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	//private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-	
 	public MessageResponse register(RegisterRequest registerRequest) throws UserException {
 		
         if (userRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
-            //return new ServiceResponse(new ApiResponse("User already present, try different email!", false), 409);
         	throw new UserException("User already present, try different email!");
         }
         if (userRepo.findByUsername(registerRequest.getUsername()).isPresent()) {
-            //return new ServiceResponse(new ApiResponse("Username is already taken!", false), 409);
         	throw new UserException("Username is already taken!");
         }
 
@@ -44,39 +37,28 @@ public class UserService {
         UserMetaData newUser = new UserMetaData();
         newUser.setUsername(registerRequest.getUsername());
         newUser.setEmail(registerRequest.getEmail());
-        //newUser.setPassword(registerRequest.getPassword());
-        
-        //newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         
         String hashedPassword = passwordEncoder.encode(registerRequest.getPassword());
         newUser.setPassword(hashedPassword);
         
         userRepo.save(newUser);
         
-		//return new ServiceResponse(new ApiResponse("Account created successfully", true), 200);
         return new MessageResponse("Account created successfully!");
 		
 	}
 	
-	public UserApiResponse login(LoginRequest loginRequest) throws UserException {
+	public UserApiResponse login(Authentication authentication) throws UserException {     
 		
-		Optional<UserMetaData> userOptional = userRepo.findByEmail(loginRequest.getEmail());
+		String username = authentication.getName();
+
+        Optional<UserMetaData> userOptional = userRepo.findByUsername(username);
         if (userOptional.isEmpty()) {
-            //return new ServiceResponse(new ApiResponse("User not found!", false), 400);
-        	throw new UserException("User not found!");
+            throw new UserException("User not found!");
         }
         
         
         UserMetaData user = userOptional.get();
         
-//        if (!user.getPassword().equals(loginRequest.getPassword())) {
-//            return new ServiceResponse(new ApiResponse("Invalid credentials!", false), 401);
-//        }
-        
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            //return new ServiceResponse(new ApiResponse("Invalid credentials!", false), 401);
-            throw new UserException("Invalid credentials!");
-        }
         
         Map<String, Object> userDetails = new HashMap<>();
         userDetails.put("_id", user.getId());
@@ -107,8 +89,6 @@ public class UserService {
 
         userDetails.put("familyRelationships", user.getFamilyRelationships());
 
-        
-        //return new ServiceResponse(new ApiResponse("Welcome back " + user.getUsername(), true, userDetails), 200);
         return new UserApiResponse("Welcome back " + user.getUsername(), new UserResponse(user));
         
 	}

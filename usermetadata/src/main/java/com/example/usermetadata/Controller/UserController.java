@@ -3,9 +3,16 @@ package com.example.usermetadata.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.usermetadata.Config.JwtUtil;
@@ -14,6 +21,7 @@ import com.example.usermetadata.DTO.LoginRequest;
 import com.example.usermetadata.DTO.MessageResponse;
 import com.example.usermetadata.DTO.RegisterRequest;
 import com.example.usermetadata.DTO.UserApiResponse;
+import com.example.usermetadata.DTO.UserResponse;
 import com.example.usermetadata.Exception.UserException;
 import com.example.usermetadata.Services.UserService;
 
@@ -37,8 +45,25 @@ public class UserController {
 	@PostMapping("/login")
     public ResponseEntity<UserApiResponse> login(@Valid @RequestBody LoginRequest loginRequest) throws UserException {
         UserApiResponse data = userService.login(loginRequest);
+        
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken( loginRequest.getEmail(), null, AuthorityUtils.createAuthorityList("ROLE_USER"));
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         String token = jwtUtil.generateToken();
-        //return new ResponseEntity<>(data, HttpStatus.OK);
+       
         return ResponseEntity.ok().header(SecurityContext.HEADER, "Bearer " + token).body(data);
     }
+	
+	@GetMapping("/getuserdetails/{id}")
+	public ResponseEntity<UserResponse> login( @PathVariable Long id) throws UserException {
+		UserResponse data = userService.getUserDetails(id);
+		return ResponseEntity.ok().body(data);
+	}
+	
+	@GetMapping("/getuserdetails")
+	public ResponseEntity<UserResponse> getUserDetails(Authentication auth) throws UserException {
+	    UserResponse data = userService.getUserDetail(auth);
+	    return ResponseEntity.ok(data);
+	}
 }

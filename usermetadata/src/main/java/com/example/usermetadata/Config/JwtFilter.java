@@ -36,7 +36,8 @@ public class JwtFilter extends OncePerRequestFilter{
 		
 		String header = request.getHeader(SecurityContext.HEADER);
 		
-		if(header != null && header.startsWith("Bearer")) {
+		if(header != null && header.startsWith("Bearer ")) {
+			
 			try {
 				
 				String token = header.substring(7);
@@ -48,9 +49,9 @@ public class JwtFilter extends OncePerRequestFilter{
                 
                 List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
                 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken( username, null, grantedAuthorities );
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken( username, null, grantedAuthorities );
                 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 
 			} catch (Exception e) {
 				throw new BadCredentialsException("Invalid JWT Token");

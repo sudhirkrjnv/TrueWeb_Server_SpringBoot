@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -93,4 +95,35 @@ public class UserService {
         return new UserApiResponse("Welcome back " + user.getUsername(), new UserResponse(user));
         
 	}
+	
+	
+	public UserResponse getUserDetails(Long id) throws UserException {
+	  
+		 Optional<UserMetaData> userOptional = userRepo.findById(id); 
+		 if(userOptional.isEmpty()) {
+			 throw new UserException("User not found!"); 
+		 }
+		 UserMetaData user = userOptional.get();
+		  
+		 return new UserResponse(user);
+	  
+	}
+	 
+	
+	public UserResponse getUserDetail(Authentication auth) throws UserException {
+		
+		if(auth == null) {
+			throw new UserException("Invalid Token");
+		}
+	    Optional<UserMetaData> opt = userRepo.findByEmail(auth.getName());
+
+	    if (!opt.isPresent()) {
+	        throw new UserException("User Not Found");
+	    }
+
+	    UserMetaData user = opt.get();
+
+	    return new UserResponse(user);
+	}
+
 }

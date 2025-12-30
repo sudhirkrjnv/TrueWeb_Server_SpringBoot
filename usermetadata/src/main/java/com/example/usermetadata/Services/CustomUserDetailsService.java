@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.example.usermetadata.Repository.UserRepo;
 
 @Service
-public class UserUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService{
 	
 	@Autowired
 	private UserRepo userRepo;
@@ -35,3 +35,4 @@ public class UserUserDetailsService implements UserDetailsService {
 	}
 
 }
+

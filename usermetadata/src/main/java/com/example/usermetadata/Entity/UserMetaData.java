@@ -1,7 +1,6 @@
 package com.example.usermetadata.Entity;
 
 import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,8 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "users")
@@ -45,7 +42,7 @@ public class UserMetaData {
 	private String instagram;
 	private String familyRelationships;
 	
-	private LocalDate dob;
+	private Date dob;
 
 	@CreationTimestamp
 	@Column(nullable=false, updatable=false)

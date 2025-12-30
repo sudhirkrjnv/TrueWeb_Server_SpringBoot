@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.usermetadata.DTO.LoginRequest;
 import com.example.usermetadata.DTO.MessageResponse;
 import com.example.usermetadata.DTO.RegisterRequest;
 import com.example.usermetadata.DTO.UserApiResponse;
@@ -47,17 +47,18 @@ public class UserService {
 		
 	}
 	
-	public UserApiResponse login(Authentication authentication) throws UserException {     
-		
-		String username = authentication.getName();
+	public UserApiResponse login(LoginRequest loginRequest) throws UserException {     
 
-        Optional<UserMetaData> userOptional = userRepo.findByUsername(username);
+        Optional<UserMetaData> userOptional = userRepo.findByEmail(loginRequest.getEmail());
         if (userOptional.isEmpty()) {
             throw new UserException("User not found!");
         }
         
         
         UserMetaData user = userOptional.get();
+        if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        	throw new UserException("Invalid Credentials!");
+        }
         
         
         Map<String, Object> userDetails = new HashMap<>();

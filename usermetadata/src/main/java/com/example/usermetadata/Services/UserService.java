@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.usermetadata.DTO.EditProfileRequest;
 import com.example.usermetadata.DTO.LoginRequest;
 import com.example.usermetadata.DTO.MessageResponse;
 import com.example.usermetadata.DTO.RegisterRequest;
@@ -125,5 +126,42 @@ public class UserService {
 
 	    return new UserResponse(user);
 	}
+	
+	public UserResponse editProfile(Authentication auth, EditProfileRequest request) throws UserException {
+
+	    if (auth == null) {
+	        throw new UserException("Invalid Token");
+	    }
+
+	    UserMetaData user = userRepo.findByEmail(auth.getName())
+	            .orElseThrow(() -> new UserException("User not found"));
+
+	    if (request.getName() != null) user.setName(request.getName());
+	    if (request.getBio() != null) user.setBio(request.getBio());
+	    if (request.getGender() != null) user.setGender(request.getGender());
+	    if (request.getDob() != null) user.setDob(request.getDob());
+	    if (request.getFamilyRelationships() != null)
+	        user.setFamilyRelationships(request.getFamilyRelationships());
+
+	    if (request.getWorkEducation() != null) {
+	        user.setUniversity(request.getWorkEducation().get("university"));
+	        user.setCollege(request.getWorkEducation().get("college"));
+	        user.setSchool(request.getWorkEducation().get("school"));
+	    }
+
+	    if (request.getLocations() != null) {
+	        user.setCurrentLocation(request.getLocations().get("currentLocation"));
+	        user.setPermanentLocation(request.getLocations().get("permanentLocation"));
+	    }
+
+	    if (request.getContactInfo() != null) {
+	        user.setWhatsapps(request.getContactInfo().get("whatsapp"));
+	        user.setInstagram(request.getContactInfo().get("instagram"));
+	    }
+
+	    userRepo.save(user);
+	    return new UserResponse(user);
+	}
+
 
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.usermetadata.Config.JwtUtil;
 import com.example.usermetadata.Config.SecurityContext;
+import com.example.usermetadata.DTO.EditProfileRequest;
 import com.example.usermetadata.DTO.LoginRequest;
 import com.example.usermetadata.DTO.MessageResponse;
 import com.example.usermetadata.DTO.RegisterRequest;
@@ -65,5 +66,11 @@ public class UserController {
 	public ResponseEntity<UserResponse> getUserDetails(Authentication auth) throws UserException {
 	    UserResponse data = userService.getUserDetail(auth);
 	    return ResponseEntity.ok(data);
+	}
+	
+	@PostMapping("/profile/edit")
+	public ResponseEntity<UserResponse> editProfile( Authentication auth, @RequestBody EditProfileRequest request) throws UserException {
+	    UserResponse response = userService.editProfile(auth, request);
+	    return ResponseEntity.ok(response);
 	}
 }

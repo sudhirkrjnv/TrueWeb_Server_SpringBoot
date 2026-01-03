@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,7 +69,7 @@ public class UserController {
 	    return ResponseEntity.ok(data);
 	}
 	
-	@PostMapping("/profile/edit")
+	@PatchMapping("/profile/edit")
 	public ResponseEntity<UserResponse> editProfile( Authentication auth, @RequestBody EditProfileRequest request) throws UserException {
 	    UserResponse response = userService.editProfile(auth, request);
 	    return ResponseEntity.ok(response);
